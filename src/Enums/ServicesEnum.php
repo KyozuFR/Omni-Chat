@@ -11,6 +11,7 @@ enum ServicesEnum: string
 	case TWITCH = 'twitch';
 	case WEBSITE = 'website';
 	case ROBLOX = 'roblox';
+	case TELEGRAM = 'telegram'
 
 	public function getCases(): string
 	{
@@ -22,6 +23,7 @@ enum ServicesEnum: string
 			self::TWITCH => 'Twitch',
 			self::WEBSITE => 'Website',
 			self::ROBLOX => 'Roblox',
+			self::TELEGRAM => 'Telegram'
 		};
 	}
 }
