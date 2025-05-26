@@ -9,7 +9,8 @@ enum ServicesEnum: string
 	case GARRYS_MOD = 'garrys_mod';
 	case MINECRAFT = 'minecraft';
 	case TWITCH = 'twitch';
-	case WEBISTE = 'website';
+	case WEBSITE = 'website';
+	case ROBLOX = 'roblox';
 
 	public function getCases(): string
 	{
@@ -19,7 +20,8 @@ enum ServicesEnum: string
 			self::GARRYS_MOD => 'Garry\'s Mod',
 			self::MINECRAFT => 'Minecraft',
 			self::TWITCH => 'Twitch',
-			self::WEBISTE => 'Website',
+			self::WEBSITE => 'Website',
+			self::ROBLOX => 'Roblox',
 		};
 	}
 }
