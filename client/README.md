@@ -1,4 +1,5 @@
-# .
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p# .
 
 This template should help get you started developing with Vue 3 in Vite.
 
