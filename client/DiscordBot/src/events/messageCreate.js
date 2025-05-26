@@ -1,20 +1,22 @@
 const { Events } = require('discord.js');
-//const fetch = require('node-fetch');
+const {resolve} = require("node:path");
+require('dotenv').config({ path: resolve(__dirname, '../.env') });
 
 module.exports = {
     name: Events.MessageCreate,
     async execute(message) {
         if (message.author.bot) return;
+        if (message.channel.id !== process.env.CHANNEL_ID) return;
         const payload = {
             content: message.content,
             author: message.author.tag,
-            service: 'discord',
         };
         try {
             console.log(JSON.stringify(payload));
-            await fetch('https://votre-api.com/endpoint', {
+            await fetch(process.env.API_LINK, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json',
+                            'X-SERVICE': 'discord' },
                 body: JSON.stringify(payload),
             });
         } catch (error) {

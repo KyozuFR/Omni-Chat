@@ -1,4 +1,6 @@
 # General Information
+
+#discord bot
 APPLICATION_ID=
 PUBLIC_KEY=
 # Installation
@@ -10,3 +12,6 @@ CLIENT_SECRET=
 TOKEN=
 # Test server
 GUILD_ID=
+
+#database
+API-LINK=https://api.example.com
