@@ -24,7 +24,6 @@ async function main() {
         await Promise.all([
             require('./deploy-commands')(client),
             require('./deploy-events')(client),
-            require('./deploy-db')(),
         ]);
 
         // Se connecter à Discord avec le token du bot
