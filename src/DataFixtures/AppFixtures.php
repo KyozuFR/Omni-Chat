@@ -7,9 +7,13 @@ use App\Enums\ServicesEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Random\RandomException;
 
 class AppFixtures extends Fixture
 {
+	/**
+	 * @throws RandomException
+	 */
 	public function load(ObjectManager $manager): void
 	{
 		$faker = Factory::create('fr_FR');

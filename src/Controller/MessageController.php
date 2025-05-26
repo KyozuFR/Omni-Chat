@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Entity\Message;
 use App\Enums\ServicesEnum;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class MessageController extends AbstractController
 {
@@ -28,14 +29,59 @@ final class MessageController extends AbstractController
 		return $this->json($data, 200);
 	}
 
+	#[Route('/messages/{id}', name: 'app_message_read', methods: ['GET'])]
+	public function read(int $id, Request $request, MessageRepository $repository): JsonResponse
+	{
+		$message = $repository->find($id);
+
+		if (!$message) {
+			return $this->json(['error' => 'Message not found'], Response::HTTP_NOT_FOUND);
+		}
+
+		$serviceHeader = $request->headers->get('X-Service');
+
+		if ($serviceHeader === $message->getService()->value) {
+			return $this->json(['error' => 'You cannot read the message you sent'], Response::HTTP_FORBIDDEN);
+		}
+
+		if ($message->getReadBy() && in_array($serviceHeader, array_map(static fn($service) => $service->value, $message->getReadBy()), true)) {
+			return $this->json(['error' => 'You have already read this message'], Response::HTTP_FORBIDDEN);
+		}
+
+		if ($serviceHeader) {
+			try {
+				$service = ServicesEnum::from($serviceHeader);
+				$message->addReadBy($service);
+				$repository->save($message, true);
+			} catch (\ValueError $e) {
+				throw new BadRequestHttpException('Invalid service specified in header.');
+			}
+		}
+
+		return $this->json($message->toArray(), Response::HTTP_OK);
+	}
+
+	/**
+	 * @throws \JsonException
+	 */
 	#[Route('/messages', name: 'app_message_create', methods: ['POST'])]
 	public function create(Request $request, ValidatorInterface $validator, MessageRepository $repository): JsonResponse
 	{
-		$data = json_decode($request->getContent(), true);
+		$serviceHeader = $request->headers->get('X-Service');
+		if (!$serviceHeader) {
+			throw new BadRequestHttpException('The X-Service header is required.');
+		}
+
+		try {
+			$service = ServicesEnum::from($serviceHeader);
+		} catch (\ValueError $e) {
+			throw new BadRequestHttpException('Invalid service specified in header.');
+		}
+
+		$data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
 		$constraints = new Assert\Collection([
 			'author' => [new Assert\NotBlank(), new Assert\Type('string')],
-			'service' => [new Assert\NotBlank(), new Assert\Choice(array_column(ServicesEnum::cases(), 'value'))],
 			'content' => [new Assert\NotBlank(), new Assert\Type('string')],
 		]);
 
@@ -51,7 +97,7 @@ final class MessageController extends AbstractController
 
 		$message = (new Message())
 			->setAuthor($data['author'])
-			->setService(ServicesEnum::from($data['service']))
+			->setService($service)
 			->setContent($data['content']);
 
 		$repository->save($message, true);
