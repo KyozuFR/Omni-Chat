@@ -161,7 +161,6 @@ class Message
 			'service' => $this->getService()?->value, // Utilise l'opérateur null-safe
 			'createdAt' => $this->getCreatedAt()->format(\DateTimeInterface::ATOM),
 			'updatedAt' => $this->getUpdatedAt()->format(\DateTimeInterface::ATOM),
-			'readBy' => $this->readBy, // Utilise directement la propriété qui stocke les strings
 		];
 	}
 }

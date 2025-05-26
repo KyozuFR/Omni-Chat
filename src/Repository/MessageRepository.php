@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Message;
+use App\Enums\ServicesEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -29,5 +30,17 @@ class MessageRepository extends ServiceEntityRepository
 		if ($flush) {
 			$this->getEntityManager()->flush();
 		}
+	}
+
+	public function findUnreadMessagesByService(ServicesEnum $service): array
+	{
+		return $this->createQueryBuilder('m')
+			->where('m.service != :service')
+			// MariaDB query: JSON column NOT LIKE pattern matching the service value
+			->andWhere('m.readBy NOT LIKE :servicePattern')
+			->setParameter('service', $service)
+			->setParameter('servicePattern', '%"' . $service->value . '"%')
+			->getQuery()
+			->getResult();
 	}
 }

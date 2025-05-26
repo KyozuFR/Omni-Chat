@@ -1,7 +1,5 @@
 <?php
 
-// TODO : suppirmer de l'affichage des records le tableau readby
-
 namespace App\Controller;
 
 use App\Repository\MessageRepository;
@@ -19,16 +17,33 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 final class MessageController extends AbstractController
 {
 	#[Route('/messages', name: 'app_message', methods: ['GET'])]
-	public function index(MessageRepository $repository): JsonResponse
+	public function index(Request $request, MessageRepository $repository): JsonResponse
 	{
-		try {
-			$messages = $repository->findAll();
-		} catch (\Exception $e) {
-			return $this->json(['error' => 'An error occurred while fetching messages.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+		$serviceHeader = $request->headers->get('X-Service');
+
+		if (!$serviceHeader || !ServicesEnum::tryFrom($serviceHeader)) {
+			return $this->json(['error' => 'Invalid or missing X-Service header.'], Response::HTTP_BAD_REQUEST);
 		}
 
+		$service = ServicesEnum::from($serviceHeader);
+
+		// Récupérer les messages non lus par le service
+		$messages = $repository->findUnreadMessagesByService($service);
+
+		if (empty($messages)) {
+			return $this->json([], Response::HTTP_OK);
+		}
+
+		// Ajouter le service à la liste des lecteurs pour chaque message
+		foreach ($messages as $message) {
+			$message->addReadBy($service);
+		}
+		// Flush all changes at once
+		$repository->getEntityManager()->flush();
+
 		$data = array_map(static fn($message) => $message->toArray(), $messages);
-		return $this->json($data, 200);
+
+		return $this->json($data, Response::HTTP_OK);
 	}
 
 	#[Route('/messages/{id}', name: 'app_message_read', methods: ['GET'])]
@@ -40,47 +55,30 @@ final class MessageController extends AbstractController
 			return $this->json(['error' => 'Message not found'], Response::HTTP_NOT_FOUND);
 		}
 
-		$serviceHeader = $request->headers->get('X-Service');
-
-		if ($serviceHeader === $message->getService()->value) {
-			return $this->json(['error' => 'You cannot read the message you sent'], Response::HTTP_FORBIDDEN);
-		}
-
-		if ($message->getReadBy() && in_array($serviceHeader, array_map(static fn($service) => $service->value, $message->getReadBy()), true)) {
-			return $this->json(['error' => 'You have already read this message'], Response::HTTP_FORBIDDEN);
-		}
-
-		if ($serviceHeader) {
-			try {
-				$service = ServicesEnum::from($serviceHeader);
-				$message->addReadBy($service);
-				$repository->save($message, true);
-			} catch (\ValueError $e) {
-				throw new BadRequestHttpException('Invalid service specified in header.');
-			}
-		}
+		// Do not modify readBy when reading a single message
 
 		return $this->json($message->toArray(), Response::HTTP_OK);
 	}
 
-	/**
-	 * @throws \JsonException
-	 */
 	#[Route('/messages', name: 'app_message_create', methods: ['POST'])]
 	public function create(Request $request, ValidatorInterface $validator, MessageRepository $repository): JsonResponse
 	{
 		$serviceHeader = $request->headers->get('X-Service');
 		if (!$serviceHeader) {
-			throw new BadRequestHttpException('The X-Service header is required.');
+			return $this->json(['error' => 'X-Service header is required.'], Response::HTTP_BAD_REQUEST);
 		}
 
 		try {
 			$service = ServicesEnum::from($serviceHeader);
 		} catch (\ValueError $e) {
-			throw new BadRequestHttpException('Invalid service specified in header.');
+			return $this->json(['error' => 'Invalid service specified in X-Service header.'], Response::HTTP_BAD_REQUEST);
 		}
 
-		$data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+		try {
+			$data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+		} catch (\JsonException $e) {
+			return $this->json(['error' => 'Invalid JSON data.'], Response::HTTP_BAD_REQUEST);
+		}
 
 		$constraints = new Assert\Collection([
 			'author' => [new Assert\NotBlank(), new Assert\Type('string')],
