@@ -1,12 +1,36 @@
 ﻿import 'dotenv/config';
-import { StaticAuthProvider} from '@twurple/auth';
+import { RefreshingAuthProvider } from '@twurple/auth';
 import {ChatClient} from '@twurple/chat';
-// @ts-ignore
 import * as process from "node:process";
+import { promises as fs } from 'fs';
 
 const MY_CHANNEL ='LaNoitDeCoco';
 
-const authProvider = new StaticAuthProvider(process.env.TWITCH_CLIENT_ID, process.env.TWITCH_ACCESS_TOKEN!);
+const clientId = 'd7p3z8hanbyjd59x51uolq74lwbwnv';
+const clientSecret = 'pmg3y6u2sotb1kaib2w40tl5cyl9il';
+async function main() {
+const tokenData = JSON.parse(await fs.readFile('./tokens.json', 'utf-8'));
+const authProvider = new RefreshingAuthProvider(
+    {
+        clientId,
+        clientSecret
+    }
+);
+
+    authProvider.onRefresh(async (newTokenData) => {
+        // Lire l'ancien contenu
+        let oldData = {};
+        try {
+            oldData = JSON.parse(await fs.readFile('./tokens.json', 'utf-8'));
+        } catch (e) {
+            // Si le fichier n'existe pas ou est corrompu, on part d'un objet vide
+        }
+        // Fusionner les anciens champs avec les nouveaux tokens
+        const mergedData = { ...oldData, ...newTokenData };
+        await fs.writeFile('./tokens.json', JSON.stringify(tokenData, null, 4), 'utf-8');
+    });
+await authProvider.addUserForToken(tokenData, ['chat']);
+
 const chatClient = new ChatClient({ authProvider, channels: [MY_CHANNEL] });
 const platform = "(twitch) ";
 
@@ -35,11 +59,11 @@ async function sendMessage(user: string, text: string) {
         console.error('Error while sending messages to API: ', error);
     }
 }
-async function updateMessage(){
+async function updateMessage() {
     try {
         const response = await fetch(process.env.API_LINK, {
             method: 'GET',
-            headers: { 'X-SERVICE': 'twitch' }
+            headers: {'X-SERVICE': 'twitch'}
         });
         if (!response.ok) throw new Error(`HTTP error : ${response.status}`);
         const messages = await response.json();
@@ -51,6 +75,7 @@ async function updateMessage(){
     } catch (error) {
         console.error('Error while getting messages: ', error);
     }
-    
-setInterval(updateMessage, 5000);
 }
+setInterval(updateMessage, 3000);
+}
+main();
