@@ -1,17 +1,53 @@
-# General Information
+# === General Information ===
 
 #discord bot
+
+# Your bot's unique application ID.
+# Found in the Discord Developer Portal under "General Information".
 APPLICATION_ID=
+
+# Your application's public key.
+# Found in the Discord Developer Portal under "General Information".
 PUBLIC_KEY=
-# Installation
-INSTALL_LINK=https://discord.com/oauth2/authorize?client_id=1288866304735973489
-# OAuth2
+
+# === Installation ===
+
+# Invite link to add the bot to a server.
+# You can generate it manually using:
+# https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot&permissions=PERMISSIONS
+INSTALL_LINK=
+
+# === OAuth2 ===
+
+# Your bot's client ID.
+# Found in the Discord Developer Portal under "General Information".
 CLIENT_ID=
+
+# Your bot's client secret.
+# Found in the Discord Developer Portal under "OAuth2" section.
 CLIENT_SECRET=
-# Bot
+
+# === Bot ===
+
+# Your bot token.
+# Found in the Discord Developer Portal under the "Bot" section.
+# ⚠️ Keep this value secret!
 TOKEN=
-# Test server
+
+# === Test server ===
+
+# The ID of the Discord server (guild) used for testing.
+# Right-click your server icon in Discord and choose "Copy Server ID" (developer mode must be enabled).
 GUILD_ID=
 
-#database
+# === Channel Used ===
+
+# The ID of the specific channel the bot will use.
+# Right-click the channel in Discord and choose "Copy Channel ID" (developer mode must be enabled).
+CHANNEL_ID=
+
+# === Database / API ===
+
+# The base URL of your backend API.
+# Replace with your actual API endpoint used for database interactions.
 API-LINK=https://api.example.com
