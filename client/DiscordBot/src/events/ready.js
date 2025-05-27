@@ -38,7 +38,7 @@ module.exports = {
                     return;
                 }
                 for (const msg of messages) {
-                    await channel.send(msg.author + ": " + msg.content);
+                    await channel.send(`(${msg.service}) ${msg.author}: ${msg.content}`);
                 }
             } catch (error) {
                 console.error('Erreur lors de la récupération des messages:', error);
