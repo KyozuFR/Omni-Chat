@@ -1,77 +1,72 @@
-if (!SERVER) then return end
+if (not SERVER) then return end
 
-include("autorun/env.lua")
+include("autorun/sv_config.lua")
+
 util.AddNetworkString("SendMessage")
 util.AddNetworkString("GetMessages")
 
-local function sendMessageToAPI(length, player)
-    local content = net.ReadString()
-
-    local function successLogic(code, body, headers)
-        //print( "HTTP request succeeded \nCODE: ", code, "\nBODY: ", body, "\nHEADER: ", headers )
-    end
-
-    local function failedLogic(reason)
-        //print( "HTTP request failed \nREASON: ", reason )
-    end
+-- Called when client sends a message; forwards it to the Symfony API
+local function sendMessageToAPI(_, ply)
+    local message = net.ReadString()
 
     local jsonBody = util.TableToJSON({
-        author = player:Nick(),
-        content = content
+        author = IsValid(ply) and ply:Nick() or "Unknown",
+        content = message or ""
     })
 
-    HTTP( {
-        failed = failedLogic,
-        success = successLogic,
+    HTTP({
         method = "POST",
+        url = omni_bot.SYMFONY_REST_API_URL,
         headers = {
             ["X-Service"] = "garrys_mod",
             ["Content-Type"] = "application/json",
         },
         body = jsonBody,
-        url = ENV.REST_API_URL,
-    } )
+        success = function(code, body, headers)
+            if code < 200 or code >= 300 then
+                print("Error sending messages to REST API -> HTTP: " .. code .. " | Message: " .. body)
+            end
+        end,
+        failed = function(reason)
+            print("Error sending messages to REST API -> Message: " .. reason)
+        end,
+    })
 end
 
+-- Periodically fetch messages from Symfony API and broadcast to clients
 local function getMessageFromAPI()
-    local function successLogic(code, body, headers)
-        //print( "HTTP request succeeded \nCODE: ", code, "\nBODY: ", body, "\nHEADER: ", headers )
-
-        local messages = util.JSONToTable(body)
-        if not istable(messages) then
-            print("Failed to parse JSON response.")
-            return
-        end
-
-        local delayStep = 3 / #messages
-
-        for i, msg in ipairs(messages) do
-            timer.Simple(i * delayStep, function()
-                net.Start("GetMessages")
-                    net.WriteUInt(1, 8)
-                    net.WriteString(msg.author or "Unknown")
-                    net.WriteString(msg.content or "(none)")
-                    net.WriteString(msg.createdAt or "?")
-                    net.WriteString(msg.service or "?")
-                net.Broadcast()
-            end)
-        end
-    end
-
-    local function failedLogic(reason)
-        //print( "HTTP request failed \nREASON: ", reason )
-    end
-
-    HTTP( {
-        failed = failedLogic,
-        success = successLogic,
+    HTTP({
         method = "GET",
+        url = omni_bot.SYMFONY_REST_API_URL,
         headers = {
             ["X-Service"] = "garrys_mod",
         },
-        url = ENV.REST_API_URL,
-    } )
+        success = function(code, body, headers)
+            if code >= 200 and code < 300 then
+                local messages = util.JSONToTable(body)
+                if not istable(messages) then
+                    print("Error requesting messages from REST API -> HTTP: 500 | Message: Invalid JSON from API.")
+                    return
+                end
+
+                for _, msg in ipairs(messages) do
+                    net.Start("GetMessages")
+                        net.WriteUInt(1, 8) -- Only sending one message at a time
+                        net.WriteString(msg.author or "Unknown")
+                        net.WriteString(msg.content or "(none)")
+                        net.WriteString(msg.service or "?")
+                    net.Broadcast()
+                end
+            else
+                print("Error requesting messages from REST API -> HTTP: " .. code .. " | Message: " .. body)
+            end
+        end,
+        failed = function(reason)
+            print("Error requesting messages from REST API -> Message: " .. reason)
+        end,
+    })
 end
 
 net.Receive("SendMessage", sendMessageToAPI)
-timer.Create("FetchChatsMessages", ENV.POLL_TIMER, 0, getMessageFromAPI)
+-- Set up polling based on the interval defined in sv_config.lua
+timer.Create("FetchChatsMessages", omni_bot.SYMFONY_REST_API_POLLING_TIMER, 0, getMessageFromAPI)

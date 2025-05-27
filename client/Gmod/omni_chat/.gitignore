@@ -1,0 +1,7 @@
+/lua/autorun/sv_config.lua
+
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
