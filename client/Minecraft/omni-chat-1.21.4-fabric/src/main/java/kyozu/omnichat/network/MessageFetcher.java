@@ -4,10 +4,8 @@ package kyozu.omnichat.network;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
-import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 public class MessageFetcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageFetcher.class);
-    private static final String API_URL = "https://api-omnichat.2linares.fr/api/messages";
+    private static final String API_URL = kyozu.omnichat.OmniChat.API_URL;
+    private static final HttpClient CLIENT = HttpClient.newHttpClient();
     private final MinecraftServer server;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -46,8 +45,7 @@ public class MessageFetcher {
                     .GET()
                     .build();
 
-            HttpClient.newHttpClient()
-                    .sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+            CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
                     .thenAccept(response -> {
                         try {
                             JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
@@ -55,18 +53,19 @@ public class MessageFetcher {
                                 var obj = el.getAsJsonObject();
                                 String author = obj.get("author").getAsString();
                                 String content = obj.get("content").getAsString();
-                                server.getPlayerManager().broadcast(Text.of("[" + author + "] " + content), false);
+                                String service = obj.get("service").getAsString();
+                                server.getPlayerManager().broadcast(Text.of("(" + service + ") " + author + ": " + content), false);
                             }
                         } catch (Exception e) {
                             LOGGER.error("Erreur de parsing des messages", e);
                         }
+                    })
+                    .exceptionally(e -> {
+                        LOGGER.error("Erreur lors du fetch des messages", e);
+                        return null;
                     });
         } catch (Exception e) {
-            LOGGER.error("Erreur lors du fetch des messages", e);
+            LOGGER.error("Erreur lors de la préparation de la requête de fetch", e);
         }
-    }
-
-    static {
-        ServerLifecycleEvents.SERVER_STARTED.register(MessageFetcher::start);
     }
 }

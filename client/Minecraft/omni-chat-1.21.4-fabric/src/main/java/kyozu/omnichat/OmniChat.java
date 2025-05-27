@@ -11,10 +11,11 @@ import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 public class OmniChat implements ModInitializer {
 	public static final String MOD_ID = "omni-chat";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	public static final String API_URL = "https://api-omnichat.2linares.fr/api/messages";
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("OmniChat mod initialized!");
 
 		ServerMessageEvents.CHAT_MESSAGE.register((message, sender, type) -> {
 			if (sender != null && !sender.getName().getString().isEmpty()) {
