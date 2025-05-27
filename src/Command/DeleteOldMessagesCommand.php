@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:messages:cleanup',
+    name: 'DeleteOldMessages',
     description: 'Supprime les messages vieux de plus d\'un certain nombre de minutes.',
 )]
 final class DeleteOldMessagesCommand extends Command
