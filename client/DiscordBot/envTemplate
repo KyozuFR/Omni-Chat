@@ -1,0 +1,17 @@
+# General Information
+
+#discord bot
+APPLICATION_ID=
+PUBLIC_KEY=
+# Installation
+INSTALL_LINK=https://discord.com/oauth2/authorize?client_id=1288866304735973489
+# OAuth2
+CLIENT_ID=
+CLIENT_SECRET=
+# Bot
+TOKEN=
+# Test server
+GUILD_ID=
+
+#database
+API-LINK=https://api.example.com
