@@ -1,0 +1,7 @@
+/.idea
+/.vscode
+/node_modules
+/src/tokens.json
+/src/index.js
+
+.env
