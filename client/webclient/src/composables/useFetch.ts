@@ -19,14 +19,14 @@ export function useFetch<T>(url: string, options: UseFetchOptions = {}): UseFetc
   const error = ref<Error | null>(null)
   const loading = ref<boolean>(false)
 
-  const baseHeaders = {
+  let baseHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     ...options.headers,
   }
 
   // Ajouter automatiquement l'en-tête X-Service pour les requêtes POST
   if (options.method === 'POST') {
-    baseHeaders['X-Service'] = 'website'
+    baseHeaders = {...baseHeaders, 'X-Service' : 'website'}
   }
 
   const execute = async (payload?: any): Promise<void> => {
