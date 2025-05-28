@@ -1,55 +1,36 @@
 <template>
-  <main class="max-w-xl mx-auto p-4">
-    <!-- Message list -->
-    <div v-if="fetchLoading" class="text-center py-4">Chargement...</div>
-    <div v-else-if="fetchError" class="text-center text-red-500 py-4">{{ fetchError.message }}</div>
-    <div v-else class="space-y-2">
-      <MessageCard v-for="msg in messages" :key="msg.id" :message="msg" />
-    </div>
+  <main class="max-w-2xl mx-auto p-4 md:p-6 lg:p-8">
+    <div class="space-y-6">
+      <header class="mb-6 text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">OmniChat</h1>
+        <p class="text-gray-600">Plateforme de messagerie unifiée</p>
+      </header>
 
-    <!-- Inline form for posting messages -->
-    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4 mt-6 p-4 border rounded-lg bg-white">
-      <input v-model="author" type="text" placeholder="Auteur" class="p-2 border rounded" required />
-      <textarea v-model="content" rows="3" placeholder="Message" class="p-2 border rounded" required></textarea>
-      <button type="submit" :disabled="posting" class="self-end bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-blue-700">
-        {{ posting ? 'Envoi...' : 'Envoyer' }}
-      </button>
-      <div v-if="postError" class="text-red-500 text-sm">{{ postError.message }}</div>
-    </form>
+      <!-- Section des messages avec effet d'ombre et meilleur positionnement -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <MessageSection ref="messageSection" />
+      </div>
+
+      <!-- Section du formulaire d'envoi avec espacement -->
+      <div class="mt-6">
+        <PostMessage @message-posted="refreshMessages" />
+      </div>
+    </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import MessageCard from '@/components/MessageCard.vue'
-import useFetch from '@/composables/useFetch'
-import { type Message } from '@/types/message.types'
-import { ref, onMounted } from 'vue'
+import MessageSection from '@/components/MessageSection.vue'
+import PostMessage from '@/components/PostMessage.vue'
+import { ref } from 'vue'
 
-// GET messages
-const { data: messages, error: fetchError, loading: fetchLoading, execute: fetchMessages } =
-  useFetch<Message[]>('https://api-omnichat.2linares.fr/api/messages')
+// Référence au composant MessageSection pour pouvoir appeler sa méthode fetchMessages
+const messageSection = ref<InstanceType<typeof MessageSection> | null>(null)
 
-// POST new message
-const author = ref('')
-const content = ref('')
-const { error: postError, loading: posting, execute: sendMessage } =
-  useFetch<{ id: number }>('https://api-omnichat.2linares.fr/api/messages', {
-    method: 'POST',
-    headers: { 'X-Service': 'website' },
-    immediate: false,
-  })
-
-async function handleSubmit() {
-  await sendMessage({ author: author.value, content: content.value })
-  author.value = ''
-  content.value = ''
-  await fetchMessages()
+// Fonction pour rafraîchir les messages après l'envoi d'un nouveau message
+const refreshMessages = () => {
+  if (messageSection.value) {
+    messageSection.value.fetchMessages()
+  }
 }
-
-onMounted(fetchMessages)
 </script>
-
-<style scoped>
-/* no additional styles */
-</style>
-
