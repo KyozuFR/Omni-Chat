@@ -3,13 +3,16 @@ import { RefreshingAuthProvider } from '@twurple/auth';
 import {ChatClient} from '@twurple/chat';
 import * as process from "node:process";
 import { promises as fs } from 'fs';
+import * as path from 'path';
+console.log('API_LINK:', process.env.API_LINK);
+
+const tokenPath = path.join(__dirname, 'tokens.json');
 
 const MY_CHANNEL ='LaNoitDeCoco';
-
 const clientId = 'd7p3z8hanbyjd59x51uolq74lwbwnv';
 const clientSecret = 'pmg3y6u2sotb1kaib2w40tl5cyl9il';
 async function main() {
-const tokenData = JSON.parse(await fs.readFile('./tokens.json', 'utf-8'));
+const tokenData = JSON.parse(await fs.readFile(tokenPath, 'utf-8'));
 const authProvider = new RefreshingAuthProvider(
     {
         clientId,
@@ -18,16 +21,7 @@ const authProvider = new RefreshingAuthProvider(
 );
 
     authProvider.onRefresh(async (newTokenData) => {
-        // Lire l'ancien contenu
-        let oldData = {};
-        try {
-            oldData = JSON.parse(await fs.readFile('./tokens.json', 'utf-8'));
-        } catch (e) {
-            // Si le fichier n'existe pas ou est corrompu, on part d'un objet vide
-        }
-        // Fusionner les anciens champs avec les nouveaux tokens
-        const mergedData = { ...oldData, ...newTokenData };
-        await fs.writeFile('./tokens.json', JSON.stringify(tokenData, null, 4), 'utf-8');
+        await fs.writeFile(tokenPath, JSON.stringify(tokenData, null, 4), 'utf-8');
     });
 await authProvider.addUserForToken(tokenData, ['chat']);
 

@@ -1,5 +1,5 @@
-/src/.env
 /.idea
 /.vscode
 /node_modules
 /src/tokens.json
+/index.js
