@@ -4,13 +4,14 @@ import { ref } from 'vue'
 interface UseFetchOptions {
   immediate?: boolean
   headers?: Record<string, string>
+  method?: RequestInit['method']
 }
 
 interface UseFetchReturn<T> {
   data: Ref<T | null>
   error: Ref<Error | null>
   loading: Ref<boolean>
-  execute: () => Promise<void>
+  execute: (payload?: any) => Promise<void>
 }
 
 export function useFetch<T>(url: string, options: UseFetchOptions = {}): UseFetchReturn<T> {
@@ -23,17 +24,21 @@ export function useFetch<T>(url: string, options: UseFetchOptions = {}): UseFetc
     ...options.headers,
   }
 
-  const execute = async (): Promise<void> => {
+  const execute = async (payload?: any): Promise<void> => {
     loading.value = true
     error.value = null
 
     try {
-      const response = await fetch(url, {
+      const fetchOptions: RequestInit = {
+        method: options.method ?? 'GET',
         headers: baseHeaders,
-      })
+      }
+      if (payload !== undefined) {
+        fetchOptions.body = JSON.stringify(payload)
+      }
+      const response = await fetch(url, fetchOptions)
 
       if (!response.ok) {
-        console.error(`Erreur HTTP: ${response.status} ${response.statusText}`)
         throw new Error(`Erreur HTTP: ${response.status}`)
       }
 
