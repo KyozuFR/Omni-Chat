@@ -12,7 +12,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Entity\Message;
 use App\Enums\ServicesEnum;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class MessageController extends AbstractController
 {
