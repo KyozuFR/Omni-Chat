@@ -1,1 +1,4 @@
-API_LINK="API_LINK"
+REST_API_LINK=https://<yourdomain>/api/messages
+CLIENT_ID=<yourclientid>
+CLIENT_SECRET=<yoursecretclient>
+TWITCH_CHANNEL=<channelname>

@@ -2,4 +2,6 @@
 /.vscode
 /node_modules
 /src/tokens.json
-/index.js
+/src/index.js
+
+.env

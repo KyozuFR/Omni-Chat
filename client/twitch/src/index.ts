@@ -4,19 +4,16 @@ import {ChatClient} from '@twurple/chat';
 import * as process from "node:process";
 import { promises as fs } from 'fs';
 import * as path from 'path';
-console.log('API_LINK:', process.env.API_LINK);
+console.log('API_LINK:', process.env.REST_API_LINK);
 
 const tokenPath = path.join(__dirname, 'tokens.json');
 
-const MY_CHANNEL ='LaNoitDeCoco';
-const clientId = 'd7p3z8hanbyjd59x51uolq74lwbwnv';
-const clientSecret = 'pmg3y6u2sotb1kaib2w40tl5cyl9il';
 async function main() {
 const tokenData = JSON.parse(await fs.readFile(tokenPath, 'utf-8'));
 const authProvider = new RefreshingAuthProvider(
     {
-        clientId,
-        clientSecret
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
     }
 );
 
@@ -25,7 +22,7 @@ const authProvider = new RefreshingAuthProvider(
     });
 await authProvider.addUserForToken(tokenData, ['chat']);
 
-const chatClient = new ChatClient({ authProvider, channels: [MY_CHANNEL] });
+const chatClient = new ChatClient({ authProvider, channels: [process.env.TWITCH_CHANNEL] });
 const platform = "(twitch) ";
 
 chatClient.connect();
@@ -41,7 +38,7 @@ async function sendMessage(user: string, text: string) {
         author: user
     };
     try {
-        await fetch(process.env.API_LINK, {
+        await fetch(process.env.REST_API_LINK, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,7 +52,7 @@ async function sendMessage(user: string, text: string) {
 }
 async function updateMessage() {
     try {
-        const response = await fetch(process.env.API_LINK, {
+        const response = await fetch(process.env.REST_API_LINK, {
             method: 'GET',
             headers: {'X-SERVICE': 'twitch'}
         });
@@ -63,7 +60,7 @@ async function updateMessage() {
         const messages = await response.json();
 
         for (const msg of messages) {
-            await chatClient.say(MY_CHANNEL, "(" + msg.service + ") " + msg.author + ": " + msg.content);
+            await chatClient.say(process.env.TWITCH_CHANNEL, "(" + msg.service + ") " + msg.author + ": " + msg.content);
             console.log("(" + msg.service + ") " + msg.author + ": " + msg.content)
         }
     } catch (error) {
