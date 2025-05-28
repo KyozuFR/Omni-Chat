@@ -5,6 +5,7 @@
     <div v-else>
       <MessageCard v-for="msg in messages" :key="msg.id" :message="msg" />
     </div>
+    <PostMessage />
   </main>
 </template>
 
@@ -12,6 +13,7 @@
 import MessageCard from '@/components/MessageCard.vue'
 import { type Message } from '@/types/message.types'
 import useFetch from '@/composables/useFetch'
+import PostMessage from '@/components/PostMessage.vue'
 
 const {
   data: messages,
