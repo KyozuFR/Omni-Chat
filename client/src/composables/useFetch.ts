@@ -33,6 +33,7 @@ export function useFetch<T>(url: string, options: UseFetchOptions = {}): UseFetc
       })
 
       if (!response.ok) {
+        console.error(`Erreur HTTP: ${response.status} ${response.statusText}`)
         throw new Error(`Erreur HTTP: ${response.status}`)
       }
 
