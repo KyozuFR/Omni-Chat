@@ -135,10 +135,36 @@ crontab -e
     - Ensure your external API sends and receives JSON in the expected format.
 
 ### 4. Gmod Installation
-(No additional details provided.)
+- Prerequisites
+    - Garry's Mod server (or localServer)
+
+- Steps
+    1. Place the gmod client folder named 'omni-chat' in 'GarrysMod/garrysmod/addons'
+    2. Go in omni-chat folder
+    3. Rename 'sv_config.example.lua' -> 'sv_config.lua'
+    4. Move 'sv_config.lua' to omni_chat/lua/autorun folder
+    5. Change the 'SYMFONY_REST_API_URL' to your url
+
 
 ### 5. Telegram Installation
-(No additional details provided.)
+- Prerequisites
+    - Node.js installed
+
+- Steps
+    1. Create a telegram bot with @BotFather
+    2. Do /start to see command list, /newbot to create a bot
+    3. You will have to choose a name and a username
+    4. Once the bot created, copy the token and put it in the .env.example 'TELEGRAM_BOT_TOKEN'
+    5. In @BotFather do /mybots, select your bot > Bot Settings > Group Privacy > Turn Off
+    6. Create a group in telegram and invite your bot in
+    7. Find the groupID and put it in the .env.example 'TELEGRAM_CHANNEL_ID'
+    8. Rename .env.example to .env
+    9. Run the express server
+
+    - Run:
+      ```
+      node app.js
+      ```
 
 ### 6. Discord Installation
 - Prerequisites
