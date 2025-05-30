@@ -261,7 +261,6 @@ npm run build
 
 ## Licence
 
-Ce projet est sous licence GPL-3.0. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
+Ce projet est sous licence Apache License 2.0. Pour plus de détails, consultez le fichier [LICENSE](LICENSE).
 ## Avertissement
 Ce projet est un travail en cours et peut contenir des bugs. N'hésitez pas à contribuer ou à signaler des problèmes.
