@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "omni-chat",
+	"version": "${version}",
+	"name": "Omni-Chat",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/omni-chat/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"kyozu.omnichat.OmniChat"
+		],
+		"client": [
+			"kyozu.omnichat.OmniChatClient"
+		]
+	},
+	"mixins": [
+		"omni-chat.mixins.json",
+		{
+			"config": "omni-chat.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

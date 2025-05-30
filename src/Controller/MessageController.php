@@ -12,7 +12,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Entity\Message;
 use App\Enums\ServicesEnum;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class MessageController extends AbstractController
 {
@@ -22,7 +21,9 @@ final class MessageController extends AbstractController
 		$serviceHeader = $request->headers->get('X-Service');
 
 		if (!$serviceHeader || !ServicesEnum::tryFrom($serviceHeader)) {
-			return $this->json(['error' => 'Invalid or missing X-Service header.'], Response::HTTP_BAD_REQUEST);
+			$message = $repository->findAll();
+			$data = array_map(static fn($message) => $message->toArray(), $message);
+			return $this->json($data, Response::HTTP_OK);
 		}
 
 		$service = ServicesEnum::from($serviceHeader);

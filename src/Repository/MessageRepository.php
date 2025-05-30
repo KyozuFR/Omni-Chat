@@ -43,4 +43,20 @@ class MessageRepository extends ServiceEntityRepository
 			->getQuery()
 			->getResult();
 	}
+	
+	/**
+	 * Supprime les messages créés avant un seuil donné.
+	 *
+	 * @param \DateTimeImmutable $threshold Date limite de suppression.
+	 * @return int Nombre de messages supprimés.
+	 */
+	public function deleteOlderThan(\DateTimeImmutable $threshold): int
+	{
+		return $this->createQueryBuilder('m')
+			->delete()
+			->where('m.createdAt < :threshold')
+			->setParameter('threshold', $threshold)
+			->getQuery()
+			->execute();
+	}
 }

@@ -1,3 +1,4 @@
+.idea
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -11,3 +12,6 @@
 
 /.idea
 /.vscode
+
+/node_modules
+/dist

@@ -1,0 +1,25 @@
+{
+  "name": "omni-chat_test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@twurple/auth": "^7.3.0",
+    "@twurple/chat": "^7.3.0",
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "tmi.js": "^1.8.5"
+  },
+  "devDependencies": {
+    "@types/tmi.js": "^1.8.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
